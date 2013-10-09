@@ -1,0 +1,15 @@
+{
+    "render.eventclient" :
+    {
+        "class" : "service\\EventClient",
+        "parameters" : ["@logger", "@logger"]
+    },
+    "render.ui" :
+    {
+        "class" : "service\\UI",
+        "parameters" : ["@render.eventclient", "@service_container"],
+        "tags" : [
+            {"name" : "extension.twig"}
+        ]
+    }
+}
