@@ -1,0 +1,25 @@
+{
+    "name": "onetest/zeroframework-eventbundle",
+    "description": "eventBundle for zeroframework",
+    "keywords": ["event", "zeroframework"],
+    "homepage": "https://github.com/onetest/zeroframework-eventbundle",
+    "type": "library",
+    "license": "GPLV2",
+    "authors": [
+        {
+            "name": "Jean pasqualini",
+            "email": "jpasqualini75@gmail.com",
+            "homepage": "http://fr.viadeo.com/fr/profile/developpeur.symfony2"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "wisembly/elephant.io": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "": "src"
+        }
+    }
+}
+
