@@ -1,0 +1,6 @@
+DEAUTH : TENTATIVE
+192.168.0.254
+AUTH ::: 2qteac7if5hj8qdn87a35hvaj6
+EMIT ::: 2qteac7if5hj8qdn87a35hvaj6
+DEAUTH : TENTATIVE
+127.0.0.1

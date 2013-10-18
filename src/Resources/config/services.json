@@ -2,7 +2,7 @@
     "render.eventclient" :
     {
         "class" : "service\\EventClient",
-        "parameters" : ["@logger", "@logger"]
+        "parameters" : ["@logger", "@logger", "@service_container"]
     },
     "render.ui" :
     {

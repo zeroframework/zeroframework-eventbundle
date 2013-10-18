@@ -26,13 +26,18 @@ class EventClient {
 
     private $user = null;
     
-    public function __construct($logger, $securityContext)
+    public function __construct($logger, $securityContext, $container)
     {
         $this->logger = $logger;
 
         $this->socket = null;
 
         $this->securityContext = $securityContext;
+
+        if(!$this->isSocket() && $container->get("event.autoboot") === true)
+        {
+            $this->connect();
+        }
     }
 
     public function setUser($user)
