@@ -7,6 +7,7 @@ namespace service;
  * and open the template in the editor.
  */
 
+use Entity\Component;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Adibox\Bundle\RenderBundle\Exception\HumanException;
@@ -208,6 +209,15 @@ class UI extends \Twig_Extension {
 
         if ($data === null)
             return $this->returnAjax();
+    }
+
+    public function updateComponent(Component $component, $clients = array())
+    {
+        $this->eventClientService->notify(
+            "component.update",
+            array("id" => $component->getId()),
+            $clients
+        );
     }
 
     protected function renderJson($data = array()) {

@@ -110,6 +110,30 @@ class EventClient {
     {
         $this->headers[$name] = $value;
     }
+
+    public function getSessionsByUsers(array $users = array())
+    {
+        $receivers = array();
+
+        foreach($users as $userEyes)
+        {
+            $receivers[] = $userEyes->getLastSessionId();
+        }
+
+        return $receivers;
+    }
+
+    public function getSessionByProfiles(array $profiles = array())
+    {
+        $receivers = array();
+
+        foreach($profiles as $userEyes)
+        {
+            $receivers[] = $userEyes->getLastSessionId();
+        }
+
+        return $receivers;
+    }
     
     //put your code here
     public function notify($name, $parametres = array(), $clients = array())
