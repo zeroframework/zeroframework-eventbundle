@@ -1,5 +1,5 @@
 {
-    "name": "onetest/zeroframework-eventbundle",
+    "name": "zeroframework/zeroframework-eventbundle",
     "description": "eventBundle for zeroframework",
     "keywords": ["event", "zeroframework"],
     "homepage": "https://github.com/onetest/zeroframework-eventbundle",
