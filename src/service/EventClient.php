@@ -1,8 +1,7 @@
 <?php
 
 namespace service;
-use Adibox\Bundle\RenderBundle\Lib\lzw;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+
 use ElephantIO\Client as Elephant;
 
 /**
@@ -22,51 +21,41 @@ class EventClient {
 
     private $enabled = true;
 
-    private $securityContext;
-
-    private $user = null;
+    private $configuration = array();
     
-    public function __construct($logger, $securityContext, $container)
+    public function __construct($logger, $container)
     {
         $this->logger = $logger;
 
         $this->socket = null;
 
-        $this->securityContext = $securityContext;
+        $this->configuration = array_merge(array(
+            "url" => "http://localhost:8765",
+            "autoboot" => true,
+            "path" => "socket.io",
+            "protocol" => 1,
+            "read" => false,
+            "checkSslPeer" => true,
+            "debug" => true
+        ), $container->get("elephant.io.config"));
 
-        if(!$this->isSocket() && $container->get("event.autoboot") === true)
+        if(!$this->isSocket() && $this->configuration["autoboot"] === true)
         {
             $this->connect();
         }
     }
 
-    public function setUser($user)
-    {
-        $this->user = $user;
-    }
-
-    public function getSecurityContext()
-    {
-        return $this->securityContext;
-    }
-
-    /**
-     * Get a user from the Security Context
-     *
-     * @return mixed
-     *
-     * @throws \LogicException If SecurityBundle is not available
-     *
-     * @see Symfony\Component\Security\Core\Authentication\Token\TokenInterface::getUser()
-     */
-    public function getUser()
-    {
-    }
-
     public function connect()
     {
         try {
-            $this->socket = new Elephant("http://localhost:8765", "socket.io", 1, false, true, true);
+            $this->socket = new Elephant(
+                $this->configuration["url"],
+                $this->configuration["path"],
+                $this->configuration["protocol"],
+                $this->configuration["read"],
+                $this->configuration["checkSslPeer"],
+                $this->configuration["debug"]
+            );
 
             $this->getSocket()->init();
         }
@@ -153,13 +142,7 @@ class EventClient {
         {
             if(empty($clients))
             {
-                $user = $this->getUser();
-
-                if(!is_object($user)) {
-                    return;
-                }
-
-                $clients = array($user->getLastSessionId());
+                return;
             }
 
             $event["clients"] = $clients;
@@ -180,26 +163,6 @@ class EventClient {
     {
         return $this->events;
     }
-    
-    public function onKernelResponse(FilterResponseEvent $event)
-    {
-        $response = $event->getResponse();
-
-        if(!$this->isSocket())
-        {
-            $data = json_encode($this->getAllEvents());
-
-            if(strlen($data) > 10000) throw new \Exception("Data event client header too long");
-
-            $response->headers->set("app-event-client", $data);
-        }
-    
-        foreach($this->headers as $name => $value)
-        {
-            $response->headers->set($name, $value);
-        }
-    }
-    
 }
 
 ?>

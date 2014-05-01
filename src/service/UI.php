@@ -48,29 +48,6 @@ class UI extends \Twig_Extension {
         //}
     }
 
-    public function openTabFromUrl($name, $icon, $url, $trigger, $clients = array()) {
-        $data = array(
-            "name" => $name,
-            "icon" => $icon,
-            "url" => $url,
-            "trigger" => $trigger
-        );
-
-        if ($this->container->get("request")->isXmlHttpRequest()) {
-            $this->eventClientService->notify("openTabFromUrl", $data, $clients);
-        } else {
-            $this->tabs[] = $data;
-        }
-    }
-
-    public function reloadTab($clients = array()) {
-        $this->eventClientService->notify("reloadTab", array(), $clients);
-    }
-
-    public function redirect($url) {
-        $this->eventClientService->setHeader("X-location", $url);
-    }
-
     public function isSocket()
     {
         return $this->eventClientService->isSocket();
@@ -123,94 +100,6 @@ class UI extends \Twig_Extension {
         }
     }
 
-    private function allowedViewRealException() {
-        $clientIp = $this->container->get("request")->getClientIp();
-
-        $ipAlloweds = array(
-            "88.170.204.16",
-            "127.0.0.1"
-        );
-
-        return (
-                $this->container->get("kernel")->isDebug()
-                ||
-                in_array($clientIp, $ipAlloweds)
-                );
-    }
-
-    public function onKernelException(GetResponseForExceptionEvent $event) {
-        $exception = $event->getException();
-
-        if (
-                $exception instanceof HumanException
-                ||
-                $this->allowedViewRealException()
-        ) {
-            $this->eventClientService->setHeader("ignore-ajax-error", "1");
-
-            //$this->flash(UI::ERROR, "", $this->container->get("translator")->trans($exception->getMessage(), array(), "humanException"));
-
-            $html = "" .
-                    "<div class='modal' id='container-exception'>" .
-                    "    <h1 class='modal-header' style='margin: 0px;'>Oups !</h1>" .
-                    "    <div class='modal-body'>" .
-                    "    <h3>" .
-                    /** @Ignore */
-                    $this->container->get("translator")->trans($exception->getMessage(), array(), "humanException") . "</h3>" .
-                    "    </div>" .
-                    "    <div class='modal-footer'>" .
-                    "        <button type='button' class='btn event' data-event='sos' data-message='" .
-                    htmlentities(
-                            /** @Ignore */
-                            $this->container->get("translator")->trans($exception->getMessage(), array(), "humanException")) . "'>J'ai besoin d'aide</button>" .
-                    "        <button type='button' class='btn btn-success' data-dismiss='modal'>J'ai bien compris</button>" .
-                    "    </div>" .
-                    "</div>";
-
-            $this->createModal(UI::TYPE_DATA, utf8_encode($html), "", array(
-                "attachTo" => "#flash_modal"
-            ));
-
-            if ($exception instanceof ExceptionWithResponse && $exception->isResponse())
-                $event->setResponse($exception->getResponse());
-
-            if (
-                    !$this->container->get("kernel")->isDebug()
-                    &&
-                    !$this->container->get("request")->isXmlHttpRequest()
-            ) {
-                $realException = null;
-
-                if ($this->allowedViewRealException()) {
-                    $realException = ($exception instanceof HumanException) ? $exception->getRealException() : $exception;
-                }
-
-                $response = new Response();
-                $response->setContent($this->container->get("templating")->render("TwigBundle:Exception:error.html.twig", array("status_code" => $exception->getCode(), "status_text" => $exception->getMessage(), "realException" => $realException)));
-
-                // HttpExceptionInterface est un type d'exception spécial qui
-                // contient le code statut et les détails de l'entête
-                if ($exception instanceof HttpExceptionInterface) {
-                    $response->setStatusCode($exception->getStatusCode());
-                    $response->headers->replace($exception->getHeaders());
-                } else {
-                    $response->setStatusCode(500);
-                }
-
-                $event->setResponse($response);
-            }
-        }
-    }
-
-    public function onKernelView(GetResponseForControllerResultEvent $event) {
-        $data = $event->getControllerResult();
-
-        $event->stopPropagation();
-
-        if ($data === null)
-            return $this->returnAjax();
-    }
-
     public function updateComponent(Component $component, $clients = array())
     {
         $this->eventClientService->notify(
@@ -230,36 +119,6 @@ class UI extends \Twig_Extension {
                     'data' => $data
                 ));
     }
-
-    public function closeTab($clients = array()) {
-        $this->eventClientService->notify("closeTab", array(), $clients);
-    }
-
-    public function closeModal($clients = array()) {
-        $this->eventClientService->notify("closeModal", array(), $clients);
-    }
-
-    public function createModal($source, $dataOrUrl, $trigger = "", $param = array(), $clients = array()) {
-        switch ($source) {
-            case UI::TYPE_DATA:
-                $this->eventClientService->notify("modalCreate", array(
-                    "source" => "data",
-                    "data" => $dataOrUrl,
-                    "trigger" => $trigger,
-                    "parameters" => $param
-                ), $clients);
-                break;
-
-            case UI::TYPE_URL:
-                $this->eventClientService->notify("modalCreate", array(
-                    "source" => "url",
-                    "url" => $dataOrUrl,
-                    "trigger" => $trigger,
-                ), $clients);
-                break;
-        }
-    }
-
 }
 
 ?>

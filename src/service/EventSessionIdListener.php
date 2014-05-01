@@ -44,19 +44,4 @@ class EventSessionIdListener extends abstractController {
             $em->flush($user);
         }
     }
-
-    public function onKernelRequest(GetResponseEvent $event)
-    {
-        $request = $event->getRequest();
-
-        $user = $this->getUser();
-
-        if(!is_object($user) || !$user instanceof UserInterface)
-        {
-            return;
-        }
-
-        $this->onChangeSessionId($user, $request);
-    }
-
 }
