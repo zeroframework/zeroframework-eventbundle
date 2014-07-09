@@ -3,6 +3,7 @@
 namespace service;
 
 use ElephantIO\Client as Elephant;
+use Exception\SocketIoConnectionFail;
 
 /**
  * Description of EventClient
@@ -61,7 +62,7 @@ class EventClient {
         }
         catch(\Exception $e)
         {
-            throw new \Exception("Server eventlive driven not started 'nohup php app/console websocket::command '");
+            throw new SocketIoConnectionFail("Server eventlive driven not started 'nohup php app/console websocket::command'");
         }
     }
 
